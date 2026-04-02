@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const subscriptionSchema = mongoose.Schema({
+const subscriptionSchema =new mongoose.Schema({
     name:{
         type:String,
         required :[true,'Subscription name is required'],
@@ -25,7 +25,7 @@ const subscriptionSchema = mongoose.Schema({
         enum:['daily','weekly','monthly','yearly']
     },
     category:{
-        type:mongoose.Schema.Types.ObjectId,
+        type:String,
         required:[true,'Subscription category is required'],
         enum:['sports','entertainment','news','lifestyle','technology','finance','politics','other']
     },
@@ -40,19 +40,23 @@ const subscriptionSchema = mongoose.Schema({
         enum:['active','cancelled','expired'],
         default:'active'
     },
-    startDate:{
-        type:Date,
-        required:[true,'Subscription start date is required'],
-        validator : (value) => value <= new Date(),
+    startDate: {
+    type: Date,
+    required: [true, 'Subscription start date is required'],
+    validate: {
+        validator: (value) => value <= new Date(),
         message: 'Start date must be in the past'
+        }
     },
-    renewalDate:{
-        type:Date,
-        required:[true,'Subscription start date is required'],
-        validator : function(value) {
-            return value > this.startDate
-            } ,
-        message: 'Renewal date must be after start date'
+    renewalDate: {
+        type: Date,
+        required: [true, 'Renewal date is required'],
+        validate: {
+            validator: function(value) {
+                return value > this.startDate;
+            },
+            message: 'Renewal date must be after start date'
+        }
     },
     user:{
         type:mongoose.Schema.Types.ObjectId,
