@@ -1,4 +1,6 @@
+import { asyncHandler } from '../middlewares/async.middleware.js';
 import User from '../models/user.model.js';
+import AppError from '../utils/appError.js';
 
 export const getUsers = async (req, res, next) => {
 	try {
@@ -9,18 +11,12 @@ export const getUsers = async (req, res, next) => {
 	}
 };
 
-export const getUser = async (req, res, next) => {
-	try {
-		const user = await User.findById(req.params.id).select('-password');
+export const getUser = asyncHandler(async (req, res, next) => {
+	const user = await User.findById(req.params.id).select('-password');
 
-		if (!user) {
-			const error = new Error('User not found');
-			error.statusCode = 404;
-			throw error;
-		}
-
-		res.status(200).json({ success: true, user });
-	} catch (error) {
-		next(error);
+	if (!user) {
+		return next(new AppError('User not found', 404));
 	}
-};
+
+	res.status(200).json({ success: true, user });
+});

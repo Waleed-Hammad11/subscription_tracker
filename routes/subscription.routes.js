@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { validate } from '../middlewares/validation.middleware.js';
+import { createSubscriptionSchema } from '../vallidators/subscription.validator.js';
 
 const subscriptionRouter = Router();
 
@@ -10,7 +12,7 @@ subscriptionRouter.get('/:id', (req, res) =>
 	res.send({ title: 'GET subscription details' }),
 );
 
-subscriptionRouter.post('/', (req, res) =>
+subscriptionRouter.post('/', validate(createSubscriptionSchema) ,(req, res) =>
 	res.send({ title: 'CREATE subscription' }),
 );
 

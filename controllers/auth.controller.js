@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import { JWT_EXPIRES_IN, JWT_SECRET } from '../config/env.js';
 import User from '../models/user.model.js';
+import AppError from '../utils/appError.js';
 export const signUp = async (req, res, next) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -13,9 +14,7 @@ export const signUp = async (req, res, next) => {
 		const existingUser = await User.findOne({ email });
 
 		if (existingUser) {
-			const error = new Error('User already exists');
-			error.statusCode = 409;
-			throw error;
+			throw new AppError('User already exists', 409);
 		}
 
 		const salt = await bcrypt.genSalt(10);
@@ -59,9 +58,7 @@ export const signIn = async (req, res, next) => {
 		const isPasswordValid = await bcrypt.compare(password, user.password);
 
 		if (!isPasswordValid) {
-			const error = new Error('Invalid password');
-			error.statusCode = 401;
-			throw error;
+			return next(new AppError('Invalid password', 401));
 		}
 
 		const token = jwt.sign({ userId: user._id }, JWT_SECRET, {

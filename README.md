@@ -5,10 +5,25 @@ subscription_tracker
 ├─ app.js
 ├─ config
 │  └─ env.js
+├─ controllers
+│  ├─ auth.controller.js
+│  └─ user.controller.js
+├─ database
+│  └─ mongodb.js
 ├─ eslint.config.js
+├─ middlewares
+│  ├─ auth.middleware.js
+│  ├─ error.middleware.js
+│  └─ ratelimiter.middleware.js
+├─ models
+│  ├─ subscription.model.js
+│  └─ user.model.js
 ├─ package-lock.json
 ├─ package.json
-└─ src
-   └─ main.js
+├─ README.md
+└─ routes
+   ├─ auth.routes.js
+   ├─ subscription.routes.js
+   └─ user.routes.js
 
 ```
