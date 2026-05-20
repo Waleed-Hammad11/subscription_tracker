@@ -12,15 +12,14 @@ import { globalErrorHandler } from './middlewares/error.middleware.js';
 import { authLimiter, globalLimiter } from './middlewares/ratelimiter.middleware.js';
 import morganMiddleware from './middlewares/morgan.middleware.js';
 import AppError from './utils/appError.js';
-import logger from './utils/logger.js';
-
+import { ALLOWED_ORIGINS } from './config/env.js';
 const app = express();
 
 app.use(helmet());
 
 app.use(
     cors({
-        origin: process.env.ALLOWED_ORIGIN || 'http://localhost:3000',
+        origin: ALLOWED_ORIGINS,
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     }),
@@ -28,25 +27,33 @@ app.use(
 
 app.use(compression());
 
+app.use(morganMiddleware);
+
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
 app.use(cookieParser());
 
 app.use(hpp());
 
-app.use(
-    mongoSanitize({
-        replaceWith: '_',
-        allowDots: true,
-        onSanitize: ({ req, key }) => {
-            logger.warn(
-                `[Security Alert] Malicious payload detected in "${key}" from IP: ${req.ip}`,
-            );
-        },
-    }),
-);
+app.use((req, res, next) => {
+    if (req.body) {
+        req.body = mongoSanitize.sanitize(req.body, { replaceWith: '_' });
+    }
 
-app.use(morganMiddleware);
+    if (req.params) {
+        req.params = mongoSanitize.sanitize(req.params, { replaceWith: '_' });
+    }
+
+    if (req.query) {
+        const sanitized = mongoSanitize.sanitize({ ...req.query }, { replaceWith: '_' });
+        Object.keys(req.query).forEach((key) => delete req.query[key]);
+        Object.assign(req.query, sanitized);
+    }
+
+    next();
+});
+
 
 app.use('/api/v1', globalLimiter);
 app.use('/api/v1/auth', authLimiter, authRouter);

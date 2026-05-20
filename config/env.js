@@ -8,3 +8,7 @@ export const {
 	JWT_SECRET,
 	JWT_EXPIRES_IN
 } = process.env;
+
+export const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',').map((url) => url.trim()) 
+    : [];
